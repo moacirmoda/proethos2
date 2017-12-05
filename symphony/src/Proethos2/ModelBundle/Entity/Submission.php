@@ -369,6 +369,13 @@ class Submission extends Base
      */
     private $attachments;
 
+    /**
+     * @var string`
+     *
+     * @ORM\Column(name="internal_protocol_number", type="string", length=510, nullable=true)
+     */
+    private $internal_protocol_number;
+
     public function __construct() {
 
         $this->country = new ArrayCollection();
