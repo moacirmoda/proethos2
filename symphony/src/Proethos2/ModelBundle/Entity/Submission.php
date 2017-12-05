@@ -1665,4 +1665,52 @@ class Submission extends Base
             return false;
         }
     }
+
+    /**
+     * Set internalProtocolNumber
+     *
+     * @param string $internalProtocolNumber
+     *
+     * @return Submission
+     */
+    public function setInternalProtocolNumber($internalProtocolNumber)
+    {
+        $this->internal_protocol_number = $internalProtocolNumber;
+
+        return $this;
+    }
+
+    /**
+     * Get internalProtocolNumber
+     *
+     * @return string
+     */
+    public function getInternalProtocolNumber()
+    {
+        return $this->internal_protocol_number;
+    }
+
+    /**
+     * Add translation
+     *
+     * @param \Proethos2\ModelBundle\Entity\Submission $translation
+     *
+     * @return Submission
+     */
+    public function addTranslation(\Proethos2\ModelBundle\Entity\Submission $translation)
+    {
+        $this->translations[] = $translation;
+
+        return $this;
+    }
+
+    /**
+     * Remove translation
+     *
+     * @param \Proethos2\ModelBundle\Entity\Submission $translation
+     */
+    public function removeTranslation(\Proethos2\ModelBundle\Entity\Submission $translation)
+    {
+        $this->translations->removeElement($translation);
+    }
 }
