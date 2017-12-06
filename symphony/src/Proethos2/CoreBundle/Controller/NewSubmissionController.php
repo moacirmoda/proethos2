@@ -811,7 +811,7 @@ class NewSubmissionController extends Controller
             $em->flush();
 
             $session->getFlashBag()->add('success', $translator->trans("Fifth step saved with sucess."));
-            return $this->redirectToRoute('submission_new_sixth_step', array('submission_id' => $submission->getId()), 301);
+            return $this->redirectToRoute('submission_new_additional_step', array('submission_id' => $submission->getId()), 301);
         }
 
         return $output;
