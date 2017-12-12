@@ -331,7 +331,7 @@ class NewSubmissionController extends Controller
             }
 
             // checking required files
-            $required_fields = array('abstract', 'keywords', 'introduction', 'justify', 'goals', 'internal_protocol_number');
+            $required_fields = array('abstract', 'keywords', 'introduction', 'justify', 'goals');
             foreach($required_fields as $field) {
                 if(!isset($post_data[$field]) or empty($post_data[$field])) {
                     $session->getFlashBag()->add('error', $translator->trans("Field '%field%' is required.", array("%field%" => $field)));
@@ -345,7 +345,6 @@ class NewSubmissionController extends Controller
             $submission->setIntroduction($post_data['introduction']);
             $submission->setJustification($post_data['justify']);
             $submission->setGoals($post_data['goals']);
-            $submission->setInternalProtocolNumber($post_data['internal_protocol_number']);
 
             $em->persist($submission);
             $em->flush();
@@ -812,7 +811,58 @@ class NewSubmissionController extends Controller
             $em->flush();
 
             $session->getFlashBag()->add('success', $translator->trans("Fifth step saved with sucess."));
-            return $this->redirectToRoute('submission_new_sixth_step', array('submission_id' => $submission->getId()), 301);
+            return $this->redirectToRoute('submission_new_additional_step', array('submission_id' => $submission->getId()), 301);
+        }
+
+        return $output;
+    }
+
+    /**
+     * @Route("/submission/new/{submission_id}/additional", name="submission_new_additional_step")
+     * @Template()
+     */
+    public function AdditionalStepAction($submission_id)
+    {
+        $output = array();
+        $request = $this->getRequest();
+        $session = $request->getSession();
+        $translator = $this->get('translator');
+        $em = $this->getDoctrine()->getManager();
+
+        $submission_repository = $em->getRepository('Proethos2ModelBundle:Submission');
+        $user_repository = $em->getRepository('Proethos2ModelBundle:User');
+
+        $user = $this->get('security.token_storage')->getToken()->getUser();
+
+        // getting the current submission
+        $submission = $submission_repository->find($submission_id);
+        $output['submission'] = $submission;
+
+        if (!$submission or $submission->getCanBeEdited() == false) {
+            if(!$submission or ($submission->getProtocol()->getIsMigrated() and !in_array('administrator', $user->getRolesSlug()))) {
+                throw $this->createNotFoundException($translator->trans('No submission found'));
+            }
+        }
+
+        $allow_to_edit_submission = true;
+        // if current user is not owner, check the team
+        if ($user != $submission->getOwner()) {
+            $allow_to_edit_submission = false;
+
+            if(in_array('administrator', $user->getRolesSlug())) {
+                $allow_to_edit_submission = true;
+
+            } else {
+                foreach($submission->getTeam() as $team_member) {
+                    // if current user = some team member, than it allows to edit
+                    if ($user == $team_member) {
+                        $allow_to_edit_submission = true;
+                    }
+                }
+            }
+        }
+        if (!$allow_to_edit_submission) {
+            throw $this->createNotFoundException($translator->trans('No submission found'));
         }
 
         return $output;
